@@ -1,1 +1,3 @@
-# Teste-de-Integracao-Testes-SQL-e-DAOs-automatizados-em-Java
+# Teste de Integracao: Testes SQL e DAOs automatizados em Java
+- Maven
+  - teste
