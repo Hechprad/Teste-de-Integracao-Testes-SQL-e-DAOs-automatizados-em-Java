@@ -21,10 +21,16 @@ public class LeilaoDaoTest {
 		session = new CriadorDeSessao().getSession();
 		usuarioDao = new UsuarioDao(session);
 		leilaoDao = new LeilaoDao(session);
+		
+		// boa prática: contexto de transação (em testes com BD)
+		session.beginTransaction();
 	}
 	
 	@After
 	public void closeSession() {
+		// boa prática: damos um rollback no BD para limpar os dados inseridos no teste
+		session.getTransaction().rollback();
+		// fechando conexão do BD
 		session.close();
 	}
 	
@@ -36,6 +42,7 @@ public class LeilaoDaoTest {
 		Leilao encerrado = new Leilao("XBox", 700.0, mario, false);
 		encerrado.encerra();
 		
+		// em um banco de verdade, esses dados seriam inceridos e continuariam ali
 		usuarioDao.salvar(mario);
 		leilaoDao.salvar(ativo);
 		leilaoDao.salvar(encerrado);

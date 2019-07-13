@@ -19,10 +19,14 @@ public class UsuarioDaoTest {
 	public void setUp() {
 		session = new CriadorDeSessao().getSession();
 		usuarioDao = new UsuarioDao(session);
+		// boa prática: contexto de transação (em testes com BD)
+		session.beginTransaction();
 	}
 
 	@After
 	public void closeSession() {
+		// boa prática: damos um rollback no BD para limpar os dados inseridos no teste
+		session.getTransaction().rollback();
 		// fechando conexão do BD
 		session.close();
 	}
