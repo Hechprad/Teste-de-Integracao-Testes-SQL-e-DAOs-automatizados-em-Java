@@ -1,6 +1,7 @@
 package br.com.caelum.pm73.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Calendar;
 import java.util.List;
@@ -127,5 +128,55 @@ public class LeilaoDaoTest {
 		
 		assertEquals(1, leiloes.size());
 		assertEquals("Caneta", leiloes.get(0).getNome());
+	}
+
+	@Test
+	public void deveTrazerLeiloesNaoEncerradosNoPeriodo() {
+		Calendar comecoDoIntervalo = Calendar.getInstance();
+		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
+		Calendar fimDoIntervalo = Calendar.getInstance();
+		
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+
+		Leilao leilao1 = new Leilao("Geladeira nova", 1500.0, hech, false);
+		Calendar dataDoLeilao1 = Calendar.getInstance();
+		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
+		leilao1.setDataAbertura(dataDoLeilao1);
+		
+		Leilao leilao2 = new Leilao("XBox", 700.0, hech, false);
+		Calendar dataDoLeilao2 = Calendar.getInstance();
+		dataDoLeilao2.add(Calendar.DAY_OF_MONTH, -20);
+		leilao2.setDataAbertura(dataDoLeilao2);
+		
+		usuarioDao.salvar(hech);
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+		
+		List<Leilao> leiloesPorPeriodo = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
+		
+		assertEquals(1, leiloesPorPeriodo.size());
+		assertEquals("Geladeira nova", leiloesPorPeriodo.get(0).getNome());
+	}
+	
+	@Test
+	public void naoDeveTrazerLeiloesEncerradosNoPeriodo() {
+		Calendar comecoDoIntervalo = Calendar.getInstance();
+		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
+		Calendar fimDoIntervalo = Calendar.getInstance();
+		
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+
+		Leilao leilao1 = new Leilao("Geladeira nova", 1500.0, hech, false);
+		Calendar dataDoLeilao1 = Calendar.getInstance();
+		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
+		leilao1.setDataAbertura(dataDoLeilao1);
+		leilao1.encerra();
+		
+		usuarioDao.salvar(hech);
+		leilaoDao.salvar(leilao1);
+		
+		List<Leilao> leiloesPorPeriodo = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
+		
+		assertEquals(0, leiloesPorPeriodo.size());
 	}
 }
