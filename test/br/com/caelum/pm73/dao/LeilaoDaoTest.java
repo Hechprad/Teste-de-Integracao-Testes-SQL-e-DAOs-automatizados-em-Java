@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.caelum.pm73.builder.LeilaoBuilder;
 import br.com.caelum.pm73.dominio.Leilao;
 import br.com.caelum.pm73.dominio.Usuario;
 
@@ -40,14 +41,18 @@ public class LeilaoDaoTest {
 	
 	@Test
 	public void deveContarLeiloesNaoEncerrados() {
-		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
+		Usuario hech = new Usuario("Jorge Hecherat", "jorge@hech.com.br");
 		
-		Leilao ativo = new Leilao("Geladeira nova", 1500.0, mario, false);
-		Leilao encerrado = new Leilao("XBox", 700.0, mario, false);
-		encerrado.encerra();
+		Leilao ativo = new LeilaoBuilder()
+				.comDono(hech)
+				.constroi();
+		Leilao encerrado = new LeilaoBuilder()
+				.comDono(hech)
+				.encerrado()
+				.constroi();
 		
 		// em um banco de verdade, esses dados seriam inceridos e continuariam ali
-		usuarioDao.salvar(mario);
+		usuarioDao.salvar(hech);
 		leilaoDao.salvar(ativo);
 		leilaoDao.salvar(encerrado);
 

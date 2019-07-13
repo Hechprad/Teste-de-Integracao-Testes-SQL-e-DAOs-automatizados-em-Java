@@ -14,9 +14,9 @@ public class LeilaoBuilder {
     private boolean encerrado;
 
     public LeilaoBuilder() {
-        this.dono = new Usuario("Joao da Silva", "joao@silva.com.br");
+        this.dono = new Usuario("Jorge Hecherat", "hech@email.com.br");
         this.valor = 1500.0;
-        this.nome = "XBox";
+        this.nome = "Caneta";
         this.usado = false;
         this.dataAbertura = Calendar.getInstance();
     }
