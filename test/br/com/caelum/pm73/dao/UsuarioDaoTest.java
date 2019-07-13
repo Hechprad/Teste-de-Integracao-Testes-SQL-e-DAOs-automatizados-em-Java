@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.hibernate.Session;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +21,12 @@ public class UsuarioDaoTest {
         this.usuarioDao = new UsuarioDao(session);
 	}
 	
+	@After
+	public void closeSession() {
+		// fechando conexão do BD
+		session.close();
+	}
+	
 	@Test
     public void deveEncontrarPeloNomeEEmail() {
         // criando um usuario e salvando antes de
@@ -32,8 +39,6 @@ public class UsuarioDaoTest {
 
         assertEquals("João da Silva", usuarioDoBanco.getNome());
         assertEquals("joao@dasilva.com.br", usuarioDoBanco.getEmail());
-
-        session.close();
         // lembrar de executar a classe "CriaTabelas" antes de executar o teste
     }
 	
@@ -42,7 +47,5 @@ public class UsuarioDaoTest {
 		Usuario usuarioDoBanco = usuarioDao.porNomeEEmail("Joaquim Peixoto", "joaquinzeira@email.com");
 		
 		assertNull(usuarioDoBanco);
-		
-		session.close();
 	}
 }
