@@ -127,6 +127,5 @@ public class LeilaoDaoTest {
 		
 		assertEquals(1, leiloes.size());
 		assertEquals("Caneta", leiloes.get(0).getNome());
-		
 	}
 }
