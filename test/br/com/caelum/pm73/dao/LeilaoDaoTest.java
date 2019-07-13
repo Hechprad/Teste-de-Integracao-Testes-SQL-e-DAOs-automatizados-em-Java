@@ -2,6 +2,9 @@ package br.com.caelum.pm73.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Calendar;
+import java.util.List;
+
 import org.hibernate.Session;
 import org.junit.After;
 import org.junit.Before;
@@ -70,6 +73,60 @@ public class LeilaoDaoTest {
 	
 	@Test
 	public void deveRetornarApenasLeiloesNovos() {
+		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
+
+		Leilao novo = new Leilao("Geladeira nova", 1500.0, mario, false);
+		Leilao usado = new Leilao("XBox", 700.0, mario, true);
+		
+		usuarioDao.salvar(mario);
+		leilaoDao.salvar(novo);
+		leilaoDao.salvar(usado);
+		
+		List<Leilao> listaDeItensNovos = leilaoDao.novos();
+		
+		assertEquals(1, listaDeItensNovos.size());
+		assertEquals("Geladeira nova", listaDeItensNovos.get(0).getNome());
+	}
+	
+	@Test
+	public void deveRetornarLeiloesCriadosHaMaisDeUmaSemana() {
+			Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
+
+			Leilao leilaoAntigo = new Leilao("Geladeira nova", 1500.0, mario, false);
+			Calendar dataAntiga = Calendar.getInstance();
+			dataAntiga.add(Calendar.DAY_OF_MONTH, -10);
+			leilaoAntigo.setDataAbertura(dataAntiga);
+			
+			Leilao leilaoNovo = new Leilao("XBox", 700.0, mario, true);
+			leilaoNovo.setDataAbertura(Calendar.getInstance());
+			
+			usuarioDao.salvar(mario);
+			leilaoDao.salvar(leilaoAntigo);
+			leilaoDao.salvar(leilaoNovo);
+			
+			List<Leilao> listaDeLeiloesAntigos = leilaoDao.antigos();
+			
+			assertEquals(1, listaDeLeiloesAntigos.size());
+			assertEquals(dataAntiga, listaDeLeiloesAntigos.get(0).getDataAbertura());
+			assertEquals("Geladeira nova", listaDeLeiloesAntigos.get(0).getNome());
+	}
+	
+	@Test
+	public void retornaLeilaoCriadoAExatamenteSeteDias() {
+		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
+		
+		Leilao leilaoSeteDias = new Leilao("Caneta", 1000.0, mario, false);
+		Calendar dataDeSeteDiasAtras = Calendar.getInstance();
+		dataDeSeteDiasAtras.add(Calendar.DAY_OF_MONTH, -7);
+		leilaoSeteDias.setDataAbertura(dataDeSeteDiasAtras);
+		
+		usuarioDao.salvar(mario);
+		leilaoDao.salvar(leilaoSeteDias);
+		
+		List<Leilao> leiloes = leilaoDao.antigos();
+		
+		assertEquals(1, leiloes.size());
+		assertEquals("Caneta", leiloes.get(0).getNome());
 		
 	}
 }
