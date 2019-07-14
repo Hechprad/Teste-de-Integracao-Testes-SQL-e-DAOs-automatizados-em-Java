@@ -149,7 +149,6 @@ public class LeilaoDaoTest {
 				.comDono(hech)
 				.diasAtras(7)
 				.constroi();
-		
 		// persistindo os dados no banco de dados
 		usuarioDao.salvar(hech);
 		leilaoDao.salvar(leilaoSeteDias);
@@ -162,51 +161,55 @@ public class LeilaoDaoTest {
 
 	@Test
 	public void deveTrazerLeiloesNaoEncerradosNoPeriodo() {
+		// definindo o período do intervalo, dez dias
 		Calendar comecoDoIntervalo = Calendar.getInstance();
 		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
 		Calendar fimDoIntervalo = Calendar.getInstance();
-		
+		// criando usuário
 		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
-
-		Leilao leilao1 = new Leilao("Geladeira nova", 1500.0, hech, false);
-		Calendar dataDoLeilao1 = Calendar.getInstance();
-		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
-		leilao1.setDataAbertura(dataDoLeilao1);
-		
-		Leilao leilao2 = new Leilao("XBox", 700.0, hech, false);
-		Calendar dataDoLeilao2 = Calendar.getInstance();
-		dataDoLeilao2.add(Calendar.DAY_OF_MONTH, -20);
-		leilao2.setDataAbertura(dataDoLeilao2);
-		
+		// criando leilão com data de dois dias atrás
+		Leilao leilao1 = new LeilaoBuilder()
+				.comDono(hech)
+				.diasAtras(2)
+				.constroi();
+		// criando leilão com data de vinte dias atrás
+		Leilao leilao2 = new LeilaoBuilder()
+				.comNome("XBox")
+				.comValor(700.0)
+				.comDono(hech)
+				.diasAtras(20)
+				.constroi();
+		// persistindo os dados no banco de dados
 		usuarioDao.salvar(hech);
 		leilaoDao.salvar(leilao1);
 		leilaoDao.salvar(leilao2);
-		
+		// pegando lista de leilões com o DAO no período definido
 		List<Leilao> leiloesPorPeriodo = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
-		
-		assertEquals(1, leiloesPorPeriodo.size());
-		assertEquals("Geladeira nova", leiloesPorPeriodo.get(0).getNome());
+		// verificando quantidade de leilões e nome do leilão na lista
+		assertEquals(1L, leiloesPorPeriodo.size());
+		assertEquals("Caneta", leiloesPorPeriodo.get(0).getNome());
 	}
 	
 	@Test
 	public void naoDeveTrazerLeiloesEncerradosNoPeriodo() {
+		// definindo o período do intervalo, dez dias
 		Calendar comecoDoIntervalo = Calendar.getInstance();
 		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
 		Calendar fimDoIntervalo = Calendar.getInstance();
-		
+		// criando usuário
 		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
-
-		Leilao leilao1 = new Leilao("Geladeira nova", 1500.0, hech, false);
-		Calendar dataDoLeilao1 = Calendar.getInstance();
-		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
-		leilao1.setDataAbertura(dataDoLeilao1);
-		leilao1.encerra();
-		
+		// criando leilão com data de dois dias atrás e encerrado
+		Leilao leilao1 = new LeilaoBuilder()
+				.comDono(hech)
+				.diasAtras(2)
+				.encerrado()
+				.constroi();
+		// persistindo os dados no banco de dados
 		usuarioDao.salvar(hech);
 		leilaoDao.salvar(leilao1);
-		
+		// pegando lista de leilões com o DAO no período definido
 		List<Leilao> leiloesPorPeriodo = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
-		
-		assertEquals(0, leiloesPorPeriodo.size());
+		// verificando quantidade de leilões na lista
+		assertEquals(0L, leiloesPorPeriodo.size());
 	}
 }
