@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.pm73.builder.LeilaoBuilder;
+import br.com.caelum.pm73.dominio.Lance;
 import br.com.caelum.pm73.dominio.Leilao;
 import br.com.caelum.pm73.dominio.Usuario;
 
@@ -210,5 +211,37 @@ public class LeilaoDaoTest {
 		List<Leilao> leiloesPorPeriodo = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
 		// verificando quantidade de leilões na lista
 		assertEquals(0L, leiloesPorPeriodo.size());
+	}
+
+	@Test
+	public void deveRetornarLeilõesDisputados() {
+		// criando usuarios
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		Usuario alan = new Usuario("Alan R", "alan@email.com.br");
+		// criando leilões com 3 lances
+		Leilao leilao1 = new LeilaoBuilder()
+				.comDono(hech)
+				.comLance(Calendar.getInstance(), hech, 1500.0)
+				.comLance(Calendar.getInstance(), alan, 1600.0)
+				.constroi();
+		Leilao leilao2 = new LeilaoBuilder()
+				.comDono(alan)
+				.comNome("Geladeira")
+				.comValor(1000.0)
+				.comLance(Calendar.getInstance(), alan, 1000.0)
+				.comLance(Calendar.getInstance(), hech, 1100.0)
+				.comLance(Calendar.getInstance(), alan, 1200.0)
+				.comLance(Calendar.getInstance(), hech, 1300.0)
+				.constroi();
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
+		usuarioDao.salvar(alan);
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+		// pegando lista de leilões disputados com o DAO entre os valores definidos
+		List<Leilao> leiloesDisputados = leilaoDao.disputadosEntre(900.0, 2000.0);
+		// verificando quantidade de leilões na lista
+		assertEquals(1L, leiloesDisputados.size());
+		assertEquals(1000.0, leiloesDisputados.get(0).getValorInicial(), 0.00001);
 	}
 }
