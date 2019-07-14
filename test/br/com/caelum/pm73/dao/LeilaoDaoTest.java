@@ -26,7 +26,6 @@ public class LeilaoDaoTest {
 		session = new CriadorDeSessao().getSession();
 		usuarioDao = new UsuarioDao(session);
 		leilaoDao = new LeilaoDao(session);
-		
 		// boa prática: contexto de transação (em testes com BD)
 		session.beginTransaction();
 	}
@@ -85,64 +84,79 @@ public class LeilaoDaoTest {
 		// pegando o total de leilões ativos com o DAO
 		long total = leilaoDao.total();
 		// verificando a quantidade de leilões ativos da lista 'total'
-		assertEquals(0, total);
+		assertEquals(0L, total);
 	}
 	
 	@Test
 	public void deveRetornarApenasLeiloesNovos() {
-		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
-
-		Leilao novo = new Leilao("Geladeira nova", 1500.0, mario, false);
-		Leilao usado = new Leilao("XBox", 700.0, mario, true);
-		
-		usuarioDao.salvar(mario);
+		// criando usuário
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		// criando leilões encerrados
+		Leilao novo = new LeilaoBuilder()
+				.comDono(hech)
+				.constroi();
+		Leilao usado = new LeilaoBuilder()
+				.comNome("XBox")
+				.comValor(700.0)
+				.comDono(hech)
+				.usado()
+				.constroi();
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
 		leilaoDao.salvar(novo);
 		leilaoDao.salvar(usado);
-		
+		// pegando lista de leilões novos com o DAO
 		List<Leilao> listaDeItensNovos = leilaoDao.novos();
-		
-		assertEquals(1, listaDeItensNovos.size());
-		assertEquals("Geladeira nova", listaDeItensNovos.get(0).getNome());
+		// verificando quantidade de leilões e nome do leilão na lista
+		assertEquals(1L, listaDeItensNovos.size());
+		assertEquals("Caneta", listaDeItensNovos.get(0).getNome());
 	}
 	
 	@Test
 	public void deveRetornarLeiloesCriadosHaMaisDeUmaSemana() {
-			Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
-
-			Leilao leilaoAntigo = new Leilao("Geladeira nova", 1500.0, mario, false);
-			Calendar dataAntiga = Calendar.getInstance();
-			dataAntiga.add(Calendar.DAY_OF_MONTH, -10);
-			leilaoAntigo.setDataAbertura(dataAntiga);
-			
-			Leilao leilaoNovo = new Leilao("XBox", 700.0, mario, true);
-			leilaoNovo.setDataAbertura(Calendar.getInstance());
-			
-			usuarioDao.salvar(mario);
-			leilaoDao.salvar(leilaoAntigo);
-			leilaoDao.salvar(leilaoNovo);
-			
-			List<Leilao> listaDeLeiloesAntigos = leilaoDao.antigos();
-			
-			assertEquals(1, listaDeLeiloesAntigos.size());
-			assertEquals(dataAntiga, listaDeLeiloesAntigos.get(0).getDataAbertura());
-			assertEquals("Geladeira nova", listaDeLeiloesAntigos.get(0).getNome());
+		// criando usuário
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		// criando leilão com data de dez dias atrás
+		Leilao leilaoAntigo = new LeilaoBuilder()
+				.comDono(hech)
+				.diasAtras(10)
+				.constroi();
+		// criando leilão com a data de hoje
+		Leilao leilaoNovo = new LeilaoBuilder()
+				.comNome("XBox")
+				.comValor(700.0)
+				.comDono(hech)
+				.usado()
+				.constroi();
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
+		leilaoDao.salvar(leilaoAntigo);
+		leilaoDao.salvar(leilaoNovo);
+		// pegando lista de leilões antigos com o DAO
+		List<Leilao> listaDeLeiloesAntigos = leilaoDao.antigos();
+		// verificando quantidade de leilões e nome do leilão na lista
+		assertEquals(1L, listaDeLeiloesAntigos.size());
+		assertEquals("Caneta", listaDeLeiloesAntigos.get(0).getNome());
 	}
 	
 	@Test
 	public void retornaLeilaoCriadoAExatamenteSeteDias() {
-		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
+		// criando usuário
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		// criando leilão com data de sete dias atrás
+		Leilao leilaoSeteDias = new LeilaoBuilder()
+				.comValor(1000.0)
+				.comDono(hech)
+				.diasAtras(7)
+				.constroi();
 		
-		Leilao leilaoSeteDias = new Leilao("Caneta", 1000.0, mario, false);
-		Calendar dataDeSeteDiasAtras = Calendar.getInstance();
-		dataDeSeteDiasAtras.add(Calendar.DAY_OF_MONTH, -7);
-		leilaoSeteDias.setDataAbertura(dataDeSeteDiasAtras);
-		
-		usuarioDao.salvar(mario);
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
 		leilaoDao.salvar(leilaoSeteDias);
-		
+		// pegando lista de leilões antigos com o DAO
 		List<Leilao> leiloes = leilaoDao.antigos();
-		
-		assertEquals(1, leiloes.size());
+		// verificando quantidade de leilões e nome do leilão na lista
+		assertEquals(1L, leiloes.size());
 		assertEquals("Caneta", leiloes.get(0).getNome());
 	}
 
