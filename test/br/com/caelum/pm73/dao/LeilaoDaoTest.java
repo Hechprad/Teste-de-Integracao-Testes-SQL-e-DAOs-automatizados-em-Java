@@ -41,39 +41,50 @@ public class LeilaoDaoTest {
 	
 	@Test
 	public void deveContarLeiloesNaoEncerrados() {
-		Usuario hech = new Usuario("Jorge Hecherat", "jorge@hech.com.br");
-		
+		// criando usuário
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		// criando leilão ativo
 		Leilao ativo = new LeilaoBuilder()
 				.comDono(hech)
 				.constroi();
+		// criando leilão encerrado
 		Leilao encerrado = new LeilaoBuilder()
 				.comDono(hech)
 				.encerrado()
 				.constroi();
-		
-		// em um banco de verdade, esses dados seriam inceridos e continuariam ali
+		// persistindo os dados no banco de dados
 		usuarioDao.salvar(hech);
 		leilaoDao.salvar(ativo);
 		leilaoDao.salvar(encerrado);
-
+		// pegando o total de leilões ativos com o DAO
 		long total = leilaoDao.total();
-		
-		assertEquals(1, total);
+		// verificando a quantidade de leilões ativos da lista 'total'
+		assertEquals(1L, total);
 	}
 	
 	@Test
 	public void deveRetornarZeroCasoNaoHajaLeiloesNovos() {
-		Usuario mario = new Usuario("Mario Costa", "mario@costa.com.br");
-
-		Leilao encerrado1 = new Leilao("Geladeira nova", 1500.0, mario, false);
-		Leilao encerrado2 = new Leilao("XBox", 700.0, mario, false);
-		
-		usuarioDao.salvar(mario);
-		encerrado1.encerra();
-		encerrado2.encerra();
-		
+		// criando usuário
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		// criando leilões encerrados
+		Leilao encerrado1 = new LeilaoBuilder()
+				.comDono(hech)
+				.comNome("Geladeira nova")
+				.encerrado()
+				.constroi();
+		Leilao encerrado2 = new LeilaoBuilder()
+				.comDono(hech)
+				.comNome("XBox")
+				.comValor(700.0)
+				.encerrado()
+				.constroi();
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
+		leilaoDao.salvar(encerrado1);
+		leilaoDao.salvar(encerrado2);
+		// pegando o total de leilões ativos com o DAO
 		long total = leilaoDao.total();
-		
+		// verificando a quantidade de leilões ativos da lista 'total'
 		assertEquals(0, total);
 	}
 	
