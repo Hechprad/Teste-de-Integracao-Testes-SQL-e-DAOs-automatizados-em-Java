@@ -1,6 +1,7 @@
 package br.com.caelum.pm73.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Calendar;
 import java.util.List;
@@ -320,4 +321,24 @@ public class LeilaoDaoTest {
 
         assertEquals(150.0, leilaoDao.getValorInicialMedioDoUsuario(comprador), 0.001);
     }
+	
+	@Test
+	public void deveDeletarUmLeilao() {
+		// criando um usuario, salvando e deletando do BD
+		Usuario hech = new Usuario("Jorge Hecherat", "jorge@email.com.br");
+		Leilao leilao = new LeilaoBuilder()
+	            .comDono(hech)
+	            .constroi();
+		// persistindo dados no BD
+		usuarioDao.salvar(hech);
+		leilaoDao.salvar(leilao);
+		// deletando leilao
+		leilaoDao.deleta(leilao);
+		// o hibernate coloca muita coisa no cash
+		// portanto, vamos forçar a execução das querys
+		session.flush();	// faz com que o comando realmente vá para o BD
+		session.clear();	// apaga o cash
+		// esperando que o retorno seja null
+		assertNull(leilaoDao.porId(leilao.getId()));
+	}
 }
