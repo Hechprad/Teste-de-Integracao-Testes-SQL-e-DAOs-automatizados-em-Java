@@ -52,4 +52,27 @@ public class UsuarioDaoTest {
 
 		assertNull(usuarioDoBanco);
 	}
+	
+	@Test
+	public void deveDeletarUmUsuario() {
+		// criando um usuario, salvando e deletando do BD
+		Usuario hech = new Usuario("Jorge Hecherat", "jorge@email.com.br");
+		usuarioDao.salvar(hech);
+		usuarioDao.deletar(hech);
+		
+		// o hibernate coloca muita coisa no cash
+		// portanto, vamos forçar a execução das querys
+		session.flush();	// faz com que o comando realmente vá para o BD
+		session.clear();	// apaga o cash
+		
+		// buscando o usuario
+		Usuario usuarioDeletado = usuarioDao.porNomeEEmail("Jorge Hecherat", "jorge@email.com");
+		// esperando que o retorno seja null
+		assertNull(usuarioDeletado);
+	}
+	
+	@Test
+	public void deveAlterarUmUsuario() {
+		
+	}
 }
