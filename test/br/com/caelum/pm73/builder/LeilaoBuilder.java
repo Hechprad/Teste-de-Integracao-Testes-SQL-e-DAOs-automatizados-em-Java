@@ -76,20 +76,13 @@ public class LeilaoBuilder {
 	private void montaListaDeLances(Leilao leilao) {
 		if(valoresDosLances.size() > 1 && valoresDosLances.get(0) != null) {
     		int i = 0;
-    		for (Double valor : valoresDosLances) {
-    			lances.add(new Lance(datasDosLances.get(i), 
-    					usuariosDosLances.get(i), 
-    					valor, 
-    					leilao));
-    		}
+    		valoresDosLances.forEach(valor ->{lances.add(new Lance(datasDosLances.get(i), usuariosDosLances.get(i), valor, leilao));});
     	}
 	}
 
 	private void adicionaLanceAoLeilao(Leilao leilao) {
 		if(lances.size() > 1 && lances.get(0) != null) {
-			for (Lance lance : lances) {
-				leilao.adicionaLance(lance);
-			}
+			lances.forEach(lance ->{leilao.adicionaLance(lance);});
 		}
 	}
 

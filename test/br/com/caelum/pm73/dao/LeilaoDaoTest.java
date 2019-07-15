@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.caelum.pm73.builder.LeilaoBuilder;
-import br.com.caelum.pm73.dominio.Lance;
 import br.com.caelum.pm73.dominio.Leilao;
 import br.com.caelum.pm73.dominio.Usuario;
 
@@ -240,8 +239,85 @@ public class LeilaoDaoTest {
 		leilaoDao.salvar(leilao2);
 		// pegando lista de leilões disputados com o DAO entre os valores definidos
 		List<Leilao> leiloesDisputados = leilaoDao.disputadosEntre(900.0, 2000.0);
-		// verificando quantidade de leilões na lista
+		// verificando quantidade e valor inicial do leilão na lista
 		assertEquals(1L, leiloesDisputados.size());
 		assertEquals(1000.0, leiloesDisputados.get(0).getValorInicial(), 0.00001);
 	}
+	
+	@Test
+	public void deveRetornarListaDeLeiloesDoUsuarioSemRepeticao() {
+		// criando usuarios
+		Usuario hech = new Usuario("Jorge Hecherat", "hech@email.com.br");
+		Usuario comprador1 = new Usuario("Alan R", "alan@email.com.br");
+		Usuario comprador2 = new Usuario("Sr. Peixoto", "peixoto@email.com.br");
+		// criando leilões
+		Leilao leilao1 = new LeilaoBuilder()
+				.comDono(hech)
+				.comNome("TV")
+				.comValor(800.0)
+				.comLance(Calendar.getInstance(), comprador1, 1000.0)
+				.comLance(Calendar.getInstance(), comprador2, 1100.0)
+				.constroi();
+		Leilao leilao2 = new LeilaoBuilder()
+				.comDono(hech)
+				.comNome("PC")
+				.comValor(2800.0)
+				.comLance(Calendar.getInstance(), comprador1, 3000.0)
+				.constroi();
+		// persistindo os dados no banco de dados
+		usuarioDao.salvar(hech);
+		usuarioDao.salvar(comprador1);
+		usuarioDao.salvar(comprador2);
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+		// pegando lista de leilões que o usuário deu pelo menos um lance
+		List<Leilao> leiloesComLanceDoUsuarioComprador1 = leilaoDao.listaLeiloesDoUsuario(comprador1);
+		List<Leilao> leiloesComLanceDoUsuarioComprador2 = leilaoDao.listaLeiloesDoUsuario(comprador2);
+		List<Leilao> leiloesComLanceDoUsuarioHech = leilaoDao.listaLeiloesDoUsuario(hech);
+		// verificando quantidade de leilões dos usuários
+		assertEquals(2, leiloesComLanceDoUsuarioComprador1.size());
+		assertEquals(1, leiloesComLanceDoUsuarioComprador2.size());
+		assertEquals(0, leiloesComLanceDoUsuarioHech.size());
+	}
+	
+	@Test
+    public void listaDeLeiloesDeUmUsuarioNaoTemRepeticao() throws Exception {
+        Usuario dono = new Usuario("Mauricio", "m@a.com");
+        Usuario comprador = new Usuario("Victor", "v@v.com");
+        Leilao leilao = new LeilaoBuilder()
+            .comDono(dono)
+            .comLance(Calendar.getInstance(), comprador, 100.0)
+            .comLance(Calendar.getInstance(), comprador, 200.0)
+            .constroi();
+        usuarioDao.salvar(dono);
+        usuarioDao.salvar(comprador);
+        leilaoDao.salvar(leilao);
+
+        List<Leilao> leiloes = leilaoDao.listaLeiloesDoUsuario(comprador);
+        assertEquals(1, leiloes.size());
+        assertEquals(leilao, leiloes.get(0));
+    }
+	
+	@Test
+    public void devolveAMediaDoValorInicialDosLeiloesQueOUsuarioParticipou(){
+        Usuario dono = new Usuario("Mauricio", "m@a.com");
+        Usuario comprador = new Usuario("Victor", "v@v.com");
+        Leilao leilao = new LeilaoBuilder()
+            .comDono(dono)
+            .comValor(50.0)
+            .comLance(Calendar.getInstance(), comprador, 100.0)
+            .comLance(Calendar.getInstance(), comprador, 200.0)
+            .constroi();
+        Leilao leilao2 = new LeilaoBuilder()
+            .comDono(dono)
+            .comValor(250.0)
+            .comLance(Calendar.getInstance(), comprador, 100.0)
+            .constroi();
+        usuarioDao.salvar(dono);
+        usuarioDao.salvar(comprador);
+        leilaoDao.salvar(leilao);
+        leilaoDao.salvar(leilao2);
+
+        assertEquals(150.0, leilaoDao.getValorInicialMedioDoUsuario(comprador), 0.001);
+    }
 }
